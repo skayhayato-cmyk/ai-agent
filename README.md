@@ -1,104 +1,111 @@
-# nexacode -- CLI coding agent (Node.js + MAIA Router)
+# 🚀 NexaCode
 
-CLI agent ala Claude Code, tapi lewat MAIA Router (`api.maiarouter.ai`) -- bisa pilih model apa
-aja yang di-support router-nya (deepseek, openai, dll, tinggal ganti nama model). Zero dependency,
-cuma pakai built-in Node.js (`fetch`, `fs`, `readline`, `child_process`), jadi aman dipasang di
-Termux tanpa drama native module / ESM.
+**NexaCode** adalah CLI *coding agent* interaktif yang ditenagai oleh **MAIA Router** (`api.maiarouter.ai`). Kamu bisa bebas memilih model AI apa saja yang didukung oleh router (seperti DeepSeek, OpenAI, dll) hanya dengan mengganti nama modelnya.
 
-## Setup
+Dirancang dengan prinsip **Zero Dependency**—hanya mengandalkan modul bawaan Node.js (`fetch`, `fs`, `readline`, `child_process`). Sangat ringan, cepat, dan **aman dipasang di Termux** tanpa perlu khawatir berurusan dengan *native module* atau drama konfigurasi ESM.
 
-1. Butuh Node.js 18+ (`node -v` buat cek). Di Termux: `pkg install nodejs`
-2. Copy `.env.example` jadi `.env` -- **`.env`**, bukan `.env.example`, itu cuma template:
+---
+
+## ✨ Fitur Utama
+
+- ⚡ **Live Streaming Response:** Teks dicetak *token-per-token* secara *real-time*. Tidak perlu menunggu AI selesai berpikir untuk mulai membaca.
+- ⏳ **Interactive UI:** Dilengkapi *spinner* dan indikator waktu (*elapsed time*) saat agent sedang memproses atau memanggil API.
+- 🔍 **Diff View (Smart Edit):** Khusus untuk `edit_file`, perubahan akan ditampilkan dalam format *diff*—baris lama (merah) dan baris baru (hijau). Kamu tahu persis apa yang akan diubah sebelum menyetujuinya.
+- 🖥️ **Live Command Output:** Saat menjalankan perintah terminal (`run_command`), output akan mengalir langsung tanpa menahan *stdout*.
+- ⌨️ **Slash Commands:** Kelola sesi dengan cepat menggunakan:
+  - `/help` — Menampilkan menu bantuan.
+  - `/clear` — Mereset riwayat obrolan (*context*).
+  - `/model [nama]` — Mengganti model secara *on-the-fly*.
+  - `/exit` — Mengakhiri sesi.
+
+---
+
+## ⚙️ Instalasi & Setup
+
+1. **Pastikan Node.js terinstal (Versi 18+)**
+   Untuk mengecek versi, jalankan `node -v`. Jika menggunakan Termux, instal dengan perintah:
+   ```bash
+   pkg install nodejs
    ```
+
+2. **Konfigurasi Environment**
+   Salin *template* konfigurasi menjadi file `.env` yang valid:
+   ```bash
    cp .env.example .env
    ```
-   lalu isi:
-   ```
-   MAIAROUTER_API_KEY=isi_api_key_kamu
+   Buka file `.env` dan isi dengan kredensial kamu:
+   ```env
+   MAIAROUTER_API_KEY=isi_api_key_kamu_di_sini
    MAIAROUTER_MODEL=deepseek/deepseek-v3.2
    ```
-3. Jalanin:
-   ```
+
+3. **Jalankan NexaCode**
+   ```bash
    node index.js
    ```
 
-## Fitur CLI
+---
 
-- **Jawaban ngetik live (streaming)** -- teks muncul token-per-token kayak Claude Code, bukan
-  nunggu model selesai baru muncul semua.
-- **Spinner + elapsed time** pas agent lagi mikir/manggil API.
-- **Diff view** buat `edit_file` -- baris lama (merah) & baris baru (hijau) ditampilin pas minta
-  konfirmasi, jadi kamu tau persis apa yang bakal diubah sebelum approve.
-- **Output live** buat `run_command` -- output command ngalir pas dijalanin, gak nunggu sampe
-  command selesai baru muncul.
-- **Slash command**: `/help`, `/clear` (reset riwayat chat), `/model [nama]` (ganti model on the
-  fly), `/exit`.
+## 🧰 Kemampuan Agent (Tools)
 
-## Tool yang dipunya agent
+NexaCode dibekali beberapa *tools* bawaan untuk membaca, mengedit, dan mengeksekusi sistem di dalam direktori kerja tempat script dijalankan:
 
-- `read_file` -- baca isi file
-- `write_file` -- bikin file baru / timpa file
-- `edit_file` -- cari & ganti string persis di dalam file (bukan timpa semua isi)
-- `list_dir` -- lihat isi folder
-- `run_command` -- jalanin perintah shell di folder kerja saat ini
+*   `read_file` — Membaca seluruh isi file.
+*   `write_file` — Membuat file baru atau menimpa file lama secara keseluruhan.
+*   `edit_file` — Mencari dan mengganti string spesifik di dalam file tanpa menimpa seluruh konten.
+*   `list_dir` — Melihat daftar file dan folder dalam sebuah direktori.
+*   `run_command` — Menjalankan perintah shell/terminal.
 
-`write_file`, `edit_file`, dan `run_command` bakal nampilin dulu apa yang mau dilakuin (diff /
-command / preview isi file) terus minta konfirmasi sebelum jalan. Pas ditanya, jawab:
-- `y` -- izinin sekali ini aja
-- `n` -- tolak
-- `a` -- izinin semua sisa tool call di sesi ini (gak ditanya lagi)
+**🛡️ Sistem Konfirmasi (Keamanan)**
+Untuk mencegah eksekusi yang tidak diinginkan, `write_file`, `edit_file`, dan `run_command` akan menampilkan *preview* (seperti *diff* atau teks perintah) dan meminta konfirmasi. Silakan jawab dengan:
+*   `y` — Izinkan eksekusi untuk aksi ini saja.
+*   `n` — Tolak eksekusi.
+*   `a` — Izinkan semua *tools* di sesi obrolan ini tanpa bertanya lagi (*auto-approve*).
 
-Mau skip konfirmasi dari awal? `node index.js -y`, atau set `AGENT_AUTO_APPROVE=true` di `.env`.
-Hati-hati pakai mode ini -- agent bisa langsung eksekusi command tanpa nanya dulu (tetep kelihatan
-apa yang dijalanin, cuma gak nunggu approve).
+---
 
-## Opsi lain
+## 🔧 Opsi Lanjutan
 
-```
-node index.js --model=openai/gpt-3.5-turbo-0125   # ganti model tanpa edit .env
-node index.js --no-stream                          # matiin streaming, balik ke mode jawaban sekaligus
-node index.js -y                                    # auto-approve dari awal
+Kamu bisa memodifikasi perilaku NexaCode melalui argumen CLI atau file `.env`.
+
+**Melalui CLI:**
+```bash
+node index.js --model=openai/gpt-3.5-turbo-0125   # Ganti model AI
+node index.js --no-stream                          # Matikan fitur streaming teks
+node index.js -y                                   # Mode bahaya: Auto-approve semua aksi!
 ```
 
-Atau lewat `.env`:
-```
+**Melalui `.env`:**
+```env
 AGENT_STREAM=false
 AGENT_AUTO_APPROVE=true
 ```
+> ⚠️ **Peringatan:** Mengaktifkan *auto-approve* (`-y` atau `AGENT_AUTO_APPROVE=true`) membuat agent bisa langsung mengeksekusi perintah shell dan memodifikasi file tanpa bertanya. Output tetap akan ditampilkan, namun gunakan dengan sangat hati-hati!
 
-## Struktur
+---
 
-```
+## 📂 Struktur Proyek
+
+```text
 nexacode/
-|- index.js         entry point
-|- src/
-|  |- config.js      load .env + argv
-|  |- ui.js           warna terminal, spinner, diff view, banner
-|  |- tools.js         definisi & implementasi tool (termasuk run_command live output)
-|  |- client.js        pemanggil endpoint chat/completions (streaming + fallback non-stream)
-|  |- agent.js          loop utama (REPL + tool-calling + slash command)
-|- .env.example
-`- package.json
+├── index.js          # Entry point aplikasi
+├── src/
+│   ├── config.js     # Menangani load .env dan argumen CLI
+│   ├── ui.js         # Formatting warna, spinner, diff view, dan banner
+│   ├── tools.js      # Definisi tools dan eksekutor sistem (termasuk live spawn)
+│   ├── client.js     # Logic fetch ke API MAIA Router (Streaming SSE & Fallback)
+│   └── agent.js      # Loop obrolan utama (REPL), eksekusi tool, & slash command
+├── .env.example      # Template konfigurasi
+└── package.json
 ```
 
-## Catatan teknis
+---
 
-- Endpoint yang dipakai: `POST {MAIAROUTER_BASE_URL}/chat/completions`, format standar
-  OpenAI-compatible (`messages` + `tools` + `tool_calls`, plus `stream: true` buat streaming),
-  sesuai klaim MAIA Router di web mereka ("Use OpenAI compatible API standard") dan contoh curl
-  yang kamu kasih. Base URL bisa diganti lewat `MAIAROUTER_BASE_URL` di `.env`.
-- Kalau server ternyata balikin JSON biasa walau diminta `stream: true` (gak semua backend model
-  konsisten dukung streaming), client otomatis fallback ke mode non-stream tanpa error.
-- `run_command` jalan pakai `spawn` (bukan `execSync`) supaya output bisa ngalir live, timeout 60
-  detik (proses di-kill paksa kalau kelewatan).
-- Semua tool dibatasi ke direktori kerja tempat kamu jalanin `node index.js` (pakai path relatif).
+## 📝 Catatan Teknis (Untuk Developer)
 
-**Soal testing:** gak bisa dites langsung ke API MAIA Router beneran (sandbox tempat aku kerja gak
-ada akses network ke domain itu + gak ada API key), jadi request/response ngikutin standar
-OpenAI-compatible yang mereka klaim + contoh curl kamu. Logic streaming (termasuk parsing SSE &
-akumulasi `tool_calls` per-chunk) udah dites pakai `ReadableStream` beneran + response event palsu
-(mock), semua skenario pass: streaming teks, streaming tool_calls yang argumennya kepotong per-chunk,
-fallback ke non-SSE, mode non-streaming, `run_command` sukses/gagal, dan full loop
-`edit_file`/`run_command` dengan konfirmasi. Yang belum tervalidasi cuma bentuk respons ASLI dari
-server MAIA Router. Kalau pas dipakai beneran ada mismatch (field beda nama, dll), paling gampang
-di-adjust di `src/client.js`.
+*   **Standarisasi API:** NexaCode berkomunikasi menggunakan standar *OpenAI-compatible* via endpoint `POST {MAIAROUTER_BASE_URL}/chat/completions`. Format pengiriman menggunakan `messages`, `tools`, `tool_calls`, dan `stream: true`. Base URL dapat disesuaikan pada file `.env`.
+*   **Status Pengujian (Testing):** Logic *streaming* (termasuk *parsing* SSE dan akumulasi `tool_calls` per-chunk) telah diuji coba dan divalidasi menggunakan *mocking* `ReadableStream`. Semua skenario berhasil *pass*: streaming teks, *tool_calls* yang terpotong per-chunk, *fallback* ke non-SSE, mode non-streaming, `run_command` (sukses/gagal), hingga *full loop* `edit_file`/`run_command` dengan konfirmasi.
+*   **Penyesuaian API MAIA Router Asli:** Mengingat pengujian berpatokan pada klaim standar *OpenAI-compatible*, bentuk respons ASLI dari server MAIA Router saat *production* belum sepenuhnya divalidasi. Jika terdapat *mismatch* saat dipraktikkan (seperti nama *field* yang berbeda), penyesuaian sangat mudah dilakukan cukup dengan mengedit logic di dalam file `src/client.js`.
+*   **Fallback Cerdas:** Jika backend model tiba-tiba tidak merespons dengan format *Server-Sent Events* (SSE) meskipun `stream: true` aktif, `client.js` akan secara otomatis melakukan *fallback* ke mode JSON (non-stream) sehingga aplikasi tidak *crash*.
+*   **Proses Eksekusi:** Fitur `run_command` memanfaatkan `child_process.spawn` (bukan `execSync`) agar aliran *stdout/stderr* dapat diteruskan langsung secara *live* ke terminal. Batas waktu eksekusi (*timeout*) ditetapkan pada **60 detik** sebelum proses dihentikan paksa.
+*   **Keamanan Path:** Agent hanya diizinkan untuk beroperasi pada direktori relatif tempat `node index.js` dieksekusi.
