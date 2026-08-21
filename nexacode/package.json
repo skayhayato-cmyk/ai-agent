@@ -1,0 +1,17 @@
+{
+  "name": "nexacode",
+  "version": "1.0.0",
+  "description": "CLI coding agent (mirip Claude Code) pakai MAIA Router API",
+  "main": "index.js",
+  "type": "commonjs",
+  "bin": {
+    "nexacode": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
